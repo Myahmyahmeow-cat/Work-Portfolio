@@ -1,0 +1,29 @@
+# Case 3 — Vendor Product Resolution Agent
+
+> Agentic pipeline maintaining vendor-product data integrity post-acquisition with autonomous resolution and structured escalation.
+
+## Problem
+
+When companies on the platform are acquired, their product listings need to be reconciled across the system: matched to acquirers, marked as defunct, or flagged for analyst review. This was a manual analyst process that backed up frequently and produced inconsistent decisions across cases.
+
+## System Architecture
+
+1. **Jurisdiction Routing** → Select correct regulatory database based on company headquarters.
+2. **Retrieval** → Cross-source query across SEC EDGAR, SEDAR+, Companies House, third-party company data, and web scraping.
+3. **Classification** → Three-stage decision framework: alignment classification → gap detection → post-resolution validation.
+4. **Validation Guardrails** → LLM tool-calling loop against live warehouse data to catch products that already exist under different vendors.
+5. **Output** → Auto-resolve confident cases; escalate ambiguous cases with structured evidence and recommended action.
+
+## Key Design Decisions
+
+**Jurisdiction-aware routing.** Different countries have different regulatory data sources. Routing queries to the right database based on company headquarters dramatically improved data quality versus querying all sources for every case.
+
+**Post-resolution validation as a separate stage.** Even after the agent decides how to classify a product, a final validation pass against live warehouse data catches false positives where the same product already exists under a different vendor — preventing duplicate listings and misattributed reviews.
+
+**Auditable decision categories with recommended actions.** Every case is classified into a defined category with a confidence score and a recommended action. Analyst review becomes approve-or-override rather than redo-from-scratch.
+
+## Impact
+
+**High-eighties autonomous resolution rate; structured escalation for the remainder.**
+
+Analysts now focus exclusively on ambiguous cases where the agent has flagged genuine uncertainty or conflicting evidence. The structured escalation format reduces analyst review time per case even on the cases that do require human judgment.
