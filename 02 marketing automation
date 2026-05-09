@@ -1,0 +1,29 @@
+# Case 2 — Marketing Automation Pipeline
+
+> Internal workflow that transformed how the marketing team produced data-driven competitive intelligence emails.
+
+## Problem
+
+The marketing team wanted to send data-driven competitive intelligence emails to clients, but each campaign required manual report assembly: pulling data, generating chart visualizations, formatting, and uploading assets. The bottleneck limited the team to a small number of campaigns per quarter.
+
+## System Architecture
+
+1. **Data Layer** → Snowflake query for competitive intelligence data on scheduled refresh.
+2. **Chart Generation** → Python pipeline produces dynamic chart images per campaign segment.
+3. **Asset Hosting** → Auto-upload to S3 with deterministic URLs for Marketo template injection.
+4. **Campaign Assembly** → Marketo template references S3 image URLs; campaign auto-populates.
+5. **Delivery** → Marketing team triggers send; system handles refresh on subsequent runs.
+
+## Key Design Decisions
+
+**Marketing team owns the trigger.** The pipeline is operated by non-technical users. The marketing team kicks off campaigns themselves; I'm not in the loop for routine sends. This was the difference between a tool I supported and a tool the team adopted.
+
+**Decoupled data, visualization, and delivery layers.** The marketing team can update Marketo templates without touching Python code; chart styling changes don't touch the email template; data refreshes happen on a schedule independent of campaign sends.
+
+**Deterministic asset URLs.** Charts are hosted at predictable S3 paths so Marketo templates reference them statically, eliminating the most painful integration issue: dynamic asset injection into email templates.
+
+## Impact
+
+**Marketing team self-sufficient on data-driven email campaigns.**
+
+Campaigns that previously required analyst assembly time now run on a self-service model. The marketing team adopted the pipeline as their default workflow for competitive intelligence emails. I served as the partner during initial deployment and onboarding; the team operates it independently now.
