@@ -1,0 +1,35 @@
+# Case 1 — Autonomous M&A Research Agent
+
+> Multi-module agentic pipeline replacing manual analyst research with automated investigation plus human-in-the-loop verification.
+
+## Problem
+
+Research analysts spent on the order of 95 business days per merger and acquisition case, manually querying multiple regulatory databases, cross-referencing company data, and synthesizing findings. Cases backed up faster than the team could clear them, with high analyst-to-analyst variance in research quality.
+
+## System Architecture
+
+1. **Ingestion** → Salesforce case trigger via Cloud Scheduler with JWT authentication.
+2. **Entity Extraction** → LangExtract + LLM for company, person, and event identification.
+3. **Retrieval Layer** → Unified tool abstraction over six sources: internal CRM, data warehouse with company-data MCP server, SEC EDGAR, search grounding, professional network data via licensed API, and Playwright-based web scraping.
+4. **Verification Gates** → Multi-source convergence required before accepting an entity match; misidentification detection via industry cluster signals and domain matching.
+5. **Reasoning Loop** → Four-phase methodology (Extract → Gather → Verify → Judge) with a state object tracking entities, conflicts, and research phases.
+6. **Confidence Routing** → Auto-resolve when sources converge; escalate with structured evidence and recommended action when they don't.
+7. **Output** → Structured report posted back to the originating case with full tool-call trace and per-field provenance.
+
+## Key Design Decisions
+
+**Multi-source convergence as a hard gate.** The agent will not commit to an entity identification from a single source, even a confident one. This eliminated the most common failure mode in early versions: confident hallucination on a single bad lead.
+
+**Cascading retrieval with precision-ranked fallback.** A six-strategy person-search and a five-level vendor resolution flow from exact domain match to fuzzy containment, each with explicit confidence scoring so downstream reasoning knows which evidence is load-bearing.
+
+**Per-field data provenance in observability.** Every output field traces to the specific tool call and source that produced it. This was the unlock for analyst trust: they could audit any AI decision in seconds rather than re-doing the research from scratch.
+
+## Impact
+
+**Average case resolution time roughly halved, at mid-to-high-eighties accuracy.**
+
+The analyst team shifted from manual-first research to AI-assisted review as their default workflow. Diagnostic infrastructure surfaces misidentifications and source conflicts automatically, feeding back into prompt and reasoning iteration.
+
+## What I'd Do Differently
+
+Build the formal evaluation harness before the third production iteration, not after. Early versions relied on ad-hoc accuracy checks against analyst benchmarks, which made it harder to detect regressions when prompts or tools changed.
